@@ -12,7 +12,11 @@ class CurrencyService
         $currencies = $this->fetch();
 
         foreach ($currencies[0]->rates as $item) {
-            $this->create($item);
+            if (!$this->checkIfExists($item)) {
+                $this->create($item);
+            } else {
+                $this->updateOrLeave($item);
+            }
         }
     }
 
@@ -23,6 +27,11 @@ class CurrencyService
         return json_decode($response->body());
     }
 
+    public function checkIfExists($item)
+    {
+        return Currency::where('currency_code', $item->code)->exists();
+    }
+
     public function create($item)
     {
         Currency::create([
@@ -30,5 +39,13 @@ class CurrencyService
             'currency_code' => $item->code,
             'exchange_rate' => str_replace('.', '', $item->mid)
         ]);
+    }
+
+    public function updateOrLeave($item)
+    {
+        $currency = Currency::where('currency_code', $item->code)->firstOrFail();
+        if ($currency->exchange_rate !== $item->mid) {
+            $currency->update(['exchange_rate' => str_replace('.', '', $item->mid)]);
+        }
     }
 }
