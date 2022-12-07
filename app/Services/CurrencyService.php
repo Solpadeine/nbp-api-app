@@ -12,7 +12,7 @@ class CurrencyService
         $currencies = $this->fetch();
 
         foreach ($currencies[0]->rates as $item) {
-            if (!$this->checkIfExists($item)) {
+            if ($this->checkIfDoesntExists($item)) {
                 $this->create($item);
             } else {
                 $this->updateOrLeave($item);
@@ -22,14 +22,15 @@ class CurrencyService
 
     public function fetch()
     {
-        $response = Http::get('http://api.nbp.pl/api/exchangerates/tables/a/');
+        $url = 'http://api.nbp.pl/api/exchangerates/tables/a/';
+        $response = Http::get($url);
 
         return json_decode($response->body());
     }
 
-    public function checkIfExists($item)
+    public function checkIfDoesntExists($item)
     {
-        return Currency::where('currency_code', $item->code)->exists();
+        return Currency::where('currency_code', $item->code)->doesntExist();
     }
 
     public function create($item)
