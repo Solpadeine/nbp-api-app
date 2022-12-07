@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [\App\Http\Controllers\CurrencyController::class, 'index']);
 Route::get('/sync', [\App\Http\Controllers\CurrencyController::class, 'sync']);
 
